@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg>
+<svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-event"
+    width="100%" height="100%">
+    <description>Теплотехнические</description>
+
+    <defs>
+        <g>
+            <rect x="0" y="0" width="130" height="65" fill="none" stroke="black" stroke-width="2px" />
+            <rect x="7" y="7" width="50" height="50" fill="none" stroke="black" stroke-width="0.5px" stroke-opacity="0.3" />
+
+            <image id="logo" x="80" y="5" width="46" height="17" />
+
+            <text x="25" y="38" font-family="Tahoma" font-size="7px" font-weight="bold">
+                <tspan text-decoration="underline">Поверитель</tspan>
+                {{verificator}}
+            </text>
+            <text x="25" y="48" font-family="Tahoma" font-size="7px" font-weight="bold">
+                Годен до {{date}}
+            </text>
+
+            <text x="70" y="60" font-family="Times New Roman" font-size="6px">
+                СТО АМНК 40.1095
+            </text>
+        </g>
+    </defs>
+</svg>

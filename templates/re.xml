@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg>
+<svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-event"
+    width="100%" height="100%">
+    <description>Электрорадиотехнические</description>
+
+    <defs>
+        <g>
+            <rect x="0" y="0" width="165" height="115" fill="none" stroke="black" stroke-width="2px"/>
+            <image id="logo" x="10" y="5" width="46" height="17" />
+
+            <image id="barcode" x="60" y="5" width="105" height="22" />
+
+            <text x="10" y="36" stroke="none" font-size="10px" font-weight="bold" font-family="Bookman Old Style">
+                Отдел главного метролога
+            </text>
+            <rect x="15" y="40" width="50" height="50" fill="none" stroke="black" stroke-width="0.5px"  stroke-opacity="0.3" />
+            <text x="85" y="50" font-family="Tahoma" font-size="7px" font-weight="bold" font-style="italic">
+                Поверитель
+            </text>
+            <text x="85" y="60" font-family="Tahoma" font-size="8px" font-weight="bold">
+                {{verificator}}
+            </text>
+
+            <text x="85" y="75" font-family="Tahoma" font-size="7px" font-weight="bold" font-style="italic">
+                Годен до
+            </text>
+            <text x="85" y="85" font-family="Tahoma" font-size="8px" font-weight="bold">
+                {{date}}
+            </text>
+
+            <text x="7" y="105" font-family="Tahoma" font-size="8px" font-weight="bold">Тип</text>
+            <line x1="30" y1="105" x2="84" y2="105" stroke="black" width="1px"/>
+            <text x="92" y="105" font-family="Tahoma" font-size="8px" font-weight="bold">№</text>
+            <line x1="110" y1="105" x2="160" y2="105" stroke="black" width="1px"/>
+            <text x="110" y="112" font-family="Times New Roman" font-size="6px">СТО АМНК 40.1095</text>
+        </g>
+    </defs>
+
+</svg>
