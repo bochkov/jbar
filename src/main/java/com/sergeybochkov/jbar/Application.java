@@ -40,9 +40,8 @@ public class Application {
         Shell shell = new Shell(display, SWT.MIN | SWT.CLOSE);
 
         shell.setText("JBar");
-		Image image = new Image(shell.getDisplay(),
-                this.getClass().getResourceAsStream("/images/main.png"));
-		shell.setImage(image);
+        Image image = new Image(shell.getDisplay(), this.getClass().getResourceAsStream("/images/main.png"));
+        shell.setImage(image);
 
         createContents(shell);
         createMenu(shell);
@@ -227,11 +226,7 @@ public class Application {
 
         File dir = new File("templates");
         if (dir.exists()){
-            File[] children = dir.listFiles(new FileFilter() {
-                public boolean accept(File file) {
-                    return !file.isDirectory() && file.getName().toLowerCase().endsWith(".xml");
-                }
-            });
+            File[] children = dir.listFiles(file -> !file.isDirectory() && file.getName().toLowerCase().endsWith(".xml"));
 
             for (final File file : children){
                 boolean first = templateMenu.getItemCount() == 0;
@@ -296,11 +291,14 @@ public class Application {
         depText.setText("");
         numText.setText("");
 
-		int index = verCombo.getSelectionIndex();
+        int index = verCombo.getSelectionIndex();
         verCombo.removeAll();
-        for (String name : verifs) verCombo.add(name);
-        if (index == -1) verCombo.select(0);
-		else verCombo.select(index);
+        for (String name : verifs)
+            verCombo.add(name);
+        if (index == -1)
+            verCombo.select(0);
+        else
+            verCombo.select(index);
 
         monthCombo.setItems(MONTHS);
         monthCombo.select(new GregorianCalendar().get(Calendar.MONTH));
@@ -380,10 +378,10 @@ public class Application {
         else
             bounds = shell.getParent().getBounds();
 
-		Point dialogSize = shell.getSize();
-		int x = bounds.x + (bounds.width - dialogSize.x) / 2;
-		int y = bounds.y + (bounds.height - dialogSize.y) / 2;
-		shell.setLocation(x, y);
+        Point dialogSize = shell.getSize();
+        int x = bounds.x + (bounds.width - dialogSize.x) / 2;
+        int y = bounds.y + (bounds.height - dialogSize.y) / 2;
+        shell.setLocation(x, y);
     }
 
     private static final String[] FIELDS = { "Подразделение", "Дата след. поверки",

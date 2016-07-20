@@ -1,7 +1,6 @@
 package com.sergeybochkov.jbar;
 
 import com.sergeybochkov.helpers.Pair;
-import net.iharder.Base64;
 import net.sourceforge.barbecue.Barcode;
 import net.sourceforge.barbecue.BarcodeException;
 import net.sourceforge.barbecue.BarcodeFactory;
@@ -16,6 +15,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Base64;
 
 /** Класс генерирует штрихкоды и представляет наклейки в формате svg */
 public class ImageMaker implements Runnable {
@@ -41,10 +42,8 @@ public class ImageMaker implements Runnable {
 
     public File generateFile() {
         File file = new File("main.svg");
-        try {
-            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8")) {
             writer.write(result);
-            writer.close();
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -74,10 +73,28 @@ public class ImageMaker implements Runnable {
     }
 
     /**
+     * Добавляет в xml-элемент логотип фирмы
+     * @return кодированная в base64 картинка
+     */
+    private String pasteLogo() {
+        String result = "data:image/png;base64,";
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            File logo = new File(System.getProperty("user.dir"), "templates/logo.png");
+            BufferedImage img = ImageIO.read(logo);
+            ImageIO.write(img, "png", out);
+            result += Base64.getEncoder().encodeToString(out.toByteArray());
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
      * Добавляет в xml-элемент из shield-объекта штрихкод и логотип
      * @param shield что вставить
      * @param element куда вставить
-     * @throws MalformedURLException
+     * @throws MalformedURLException exception
      */
     private void pasteBarAndLogo(Shield shield, Element element) throws MalformedURLException {
         NodeList list = element.getElementsByTagName("image");
@@ -89,10 +106,8 @@ public class ImageMaker implements Runnable {
                     String data = shield.getCode();
                     el.setAttribute("xlink:href", generateBarcode(data));
                 }
-                if (el.getAttribute("id").equals("logo")){
-                    File logo = new File("src/main/templates/logo.png");
-                    el.setAttribute("xlink:href", logo.toURI().toURL().toString());
-                }
+                if (el.getAttribute("id").equals("logo"))
+                    el.setAttribute("xlink:href", pasteLogo());
             }
         }
     }
@@ -167,10 +182,10 @@ public class ImageMaker implements Runnable {
         try {
             barcode = BarcodeFactory.createCode128(data);
             barcode.setBarHeight(40);
-			barcode.setBarWidth(2);
+            barcode.setBarWidth(2);
             barcode.setFont(new Font("Verdana", Font.BOLD, 13));
             barcode.setDrawingQuietSection(false);
-			barcode.setDrawingText(true);
+            barcode.setDrawingText(true);
             barcode.setDoubleBuffered(true);
 
             String label = data.substring(0, 3) + " " +
@@ -189,9 +204,10 @@ public class ImageMaker implements Runnable {
             Graphics2D g = (Graphics2D)image.getGraphics();
             barcode.draw(g, 0, 0);
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ImageIO.write(image, "PNG", out);
-            result += Base64.encodeBytes(out.toByteArray());
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                ImageIO.write(image, "PNG", out);
+                result += Base64.getEncoder().encodeToString(out.toByteArray());
+            }
         }
         catch (BarcodeException e) {
             Application.showError("Ошибка генерации штрихкода:\n" + e.getMessage());
