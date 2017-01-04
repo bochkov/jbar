@@ -1,70 +1,64 @@
 package com.sergeybochkov.jbar;
 
-/** Класс содержит информацию об однотипных генерируемых наклейках */
-public class Shield {
-    /**
-     * Конструктор класса
-     * @param name ФИО поверителя
-     * @param month месяц следующей поверки
-     * @param year год следующей поверки
-     * @param code код подразделения
-     * @param num количество наклеек
-     */
-    public Shield(String name, int month, int year, int code, int num){
-        this.name = name;
-        this.month = month;
-        this.year = year;
-        this.code = code;
-        this.num = num;
+import java.text.DateFormat;
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+public final class Shield {
+
+    private static final DateFormat DF_LONG = new SimpleDateFormat("MMMM yyyy", new DateFormatSymbols() {
+        @Override
+        public String[] getMonths() {
+            return new String[] {"Января", "Февраля", "Марта", "Апреля", "Мая", "Июня",
+                    "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"};
+        }
+    });
+    private static final DateFormat DF_SHORT = new SimpleDateFormat("MM.yyyy");
+    private static final DateFormat DF_BARCODE = new SimpleDateFormat("MMyyyy");
+
+    private final Date date;
+    private final String verification;
+    private final String department;
+    private final Integer count;
+
+    public Shield(String verification, Integer month, Integer year, String department, Integer count) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month, 1);
+        this.date = cal.getTime();
+        this.verification = verification;
+        this.department = department;
+        this.count = count;
     }
 
-    /**
-     * Возвращает код подразделения
-     * @return String
-     */
-    public String getDep(){ return String.valueOf(code); }
-
-    /**
-     * Возвращает количество однотипных наклеек
-     * @return int
-     */
-    public int getNum() { return num; }
-
-    /**
-     * Возвращает дату следующей поверки в формате "месяц год"
-     * @return String
-     */
-    public String getDate() {
-        return Application.MONTHS_TO[month] + " " + year;
+    public String department() {
+        return department;
     }
 
-    /**
-     * Возвращает дату следующей поверки в формате "mm.yyyy"
-     * @return String
-     */
-    public String getDateNum(){
-        String m = (month + 1) < 10 ? "0" + (month+1) : "" + (month+1);
-        return m + "." + year;
+    public int count() {
+        return count;
     }
 
-    /**
-     * Возвращает строку, которая кодируется в штрихкоде
-     * @return String
-     */
-    public String getCode(){
-        String m = (month + 1) < 10 ? "0" + (month+1) : "" + (month+1);
-        return String.valueOf(code) + m + String.valueOf(year);
+    public String longDate() {
+        return DF_LONG.format(date);
     }
 
-    /**
-     * Возвращает ФИО поверителя
-     * @return String
-     */
-    public String getName() { return name; }
+    public String shortDate() {
+        return DF_SHORT.format(date);
+    }
 
-    private String name;
-    private int month;
-    private int year;
-    private int code;
-    private int num;
+    public String barcodeDate() {
+        return String.format("%s%s", department, DF_BARCODE.format(date));
+    }
+
+    public String barcodeLabel() {
+        return String.format("%s  %s  %s", department,
+                new SimpleDateFormat("MM").format(date),
+                new SimpleDateFormat("yyyy").format(date));
+    }
+
+    public String verification() {
+        return verification;
+    }
 }
