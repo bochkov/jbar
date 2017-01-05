@@ -33,7 +33,7 @@ public final class Application implements ShieldTarget {
         display = new Display();
         mainShell = new Shell(display, SWT.MIN | SWT.CLOSE);
         mainShell.setText("JBar");
-        mainShell.setImage(new Image(display, Application.class.getResourceAsStream("/images/about_main.png")));
+        mainShell.setImage(new Image(display, Application.class.getResourceAsStream("/images/barcode.png")));
         gui = new Gui(mainShell, this);
         aboutDialog = new AboutDialog(mainShell);
         try {

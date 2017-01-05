@@ -37,7 +37,7 @@ public final class AboutDialog extends Dialog {
     private void createContents() {
         shell.setLayout(new GridLayout(1, true));
         Label iLabel = new Label(shell, SWT.CENTER);
-        iLabel.setImage(new Image(null, AboutDialog.class.getResourceAsStream("/images/about_main.png")));
+        iLabel.setImage(new Image(null, AboutDialog.class.getResourceAsStream("/images/barcode.png")));
         iLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         Label title = new Label(shell, SWT.CENTER);

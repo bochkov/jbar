@@ -25,7 +25,7 @@ macAppBundle {
     appName = "JBar"
     bundleIdentifier = "com.sergeybochkov.jbar"
     mainClassName = "com.sergeybochkov.jbar.Application"
-    icon = "src/main/resources/images/about_main.png"
+    icon = "src/main/resources/images/barcode.icns"
     javaProperties.put("-Dapple.laf.useScreenBar", "true")
     javaProperties.put("-XstartOnFirstThread", "true")
 }
