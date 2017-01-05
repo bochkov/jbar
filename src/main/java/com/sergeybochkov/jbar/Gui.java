@@ -5,7 +5,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public final class Gui {
@@ -66,22 +67,22 @@ public final class Gui {
                 .fill()
                 .combo();
 
-        Button addButton = new SButton(group, "Добавить", this::add)
-                .right()
+        Composite composite = new SComposite(group)
+                .layout(new GridLayout(2, false))
                 .span(2)
-                .button();
-        shell.setDefaultButton(addButton);
+                .right()
+                .composite();
+        new SButton(composite, "В список", this::add);
+        new SButton(composite, "Сейчас", () -> target.generateNow(shield()));
 
         table = new STable(shell, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION, FIELDS)
                 .fill()
                 .span(2);
 
         new SButton(shell, "Очистить", table::removeAll)
-                .left()
-                .button();
+                .left();
         new SButton(shell, "Сгенерировать", () -> target.generate(table.items()))
-                .right()
-                .button();
+                .right();
 
         status = new SLabel(shell, "")
                 .left()
@@ -101,14 +102,18 @@ public final class Gui {
         return years.toArray(new String[years.size()]);
     }
 
+    private Shield shield() {
+        return new Shield(
+                verificators.getText(),
+                months.getSelectionIndex(),
+                Integer.parseInt(years.getText()),
+                department.getText(),
+                Integer.parseInt(count.getText()));
+    }
+
     private void add() {
         try {
-            Shield shield = new Shield(
-                    verificators.getText(),
-                    months.getSelectionIndex(),
-                    Integer.parseInt(years.getText()),
-                    department.getText(),
-                    Integer.parseInt(count.getText()));
+            Shield shield = shield();
             table.add(shield);
             if (!verificatorList.contains(verificators.getText())) {
                 verificators.add(verificators.getText());

@@ -133,6 +133,7 @@ public final class Template {
         barcode.draw((Graphics2D) image.getGraphics(), 0, 0);
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             ImageIO.write(image, "PNG", out);
+            out.flush();
             return String.format("data:image/png;base64,%s",
                     Base64.getEncoder().encodeToString(out.toByteArray()));
         }

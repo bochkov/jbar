@@ -8,7 +8,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -142,6 +145,23 @@ public final class Application implements ShieldTarget {
     public void generate(List<Shield> shields) {
         Display.getCurrent().syncExec(() -> {
             try {
+                Program.launch(selectedTemplate.generate(shields).getName());
+            }
+            catch (Exception ex) {
+                new SMessageBox(mainShell, SWT.ICON_ERROR)
+                        .title("Ошибка")
+                        .message(ex)
+                        .open();
+            }
+        });
+    }
+
+    @Override
+    public void generateNow(Shield shield) {
+        Display.getCurrent().syncExec(() -> {
+            try {
+                List<Shield> shields = new ArrayList<>();
+                shields.add(shield);
                 Program.launch(selectedTemplate.generate(shields).getName());
             }
             catch (Exception ex) {
