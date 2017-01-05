@@ -1,5 +1,5 @@
 plugins {
-    id "edu.sc.seis.macAppBundle" version "2.1.6"
+    id "com.github.cr0.macappbundle" version "3.0.1"
 }
 
 apply plugin: 'java'
@@ -26,6 +26,13 @@ macAppBundle {
     bundleIdentifier = "com.sergeybochkov.jbar"
     mainClassName = "com.sergeybochkov.jbar.Application"
     icon = "src/main/resources/images/barcode.icns"
-    javaProperties.put("-Dapple.laf.useScreenBar", "true")
-    javaProperties.put("-XstartOnFirstThread", "true")
+    bundleExtras.put("NSHighResolutionCapable", "true")
+    javaProperties.put("apple.laf.useScreenBar", "true")
+    javaXProperties.add("startOnFirstThread")
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.sergeybochkov.jbar.Application'
+    }
 }
