@@ -3,6 +3,7 @@ package com.sergeybochkov.jbar;
 import com.sergeybochkov.jbar.widgets.SMenu;
 import com.sergeybochkov.jbar.widgets.SMenuItem;
 import com.sergeybochkov.jbar.widgets.SMessageBox;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -21,7 +22,10 @@ import java.util.List;
 
 public final class Application implements ShieldTarget {
 
-    private static final String INI_FILE = "jbar.ini";
+    public static final File APP_DIR = new File(System.getProperty("user.home"), ".jbar");
+    public static final File TEMPLATE_DIR = new File(APP_DIR, "templates");
+    public static final File INI_FILE = new File(APP_DIR, "jbar.ini");
+    public static final File OUT_FILE = new File(APP_DIR, "main.svg");
 
     private final Display display;
     private final Shell mainShell;
@@ -39,6 +43,7 @@ public final class Application implements ShieldTarget {
         mainShell.setImage(new Image(display, Application.class.getResourceAsStream("/images/barcode.png")));
         gui = new Gui(mainShell, this);
         aboutDialog = new AboutDialog(mainShell);
+        createProgramFolder();
         try {
             fillTemplates();
         }
@@ -84,10 +89,27 @@ public final class Application implements ShieldTarget {
         }
     }
 
+    private void createProgramFolder() {
+        if (!APP_DIR.exists()) {
+            try {
+                if (!TEMPLATE_DIR.exists() && !TEMPLATE_DIR.mkdirs())
+                    throw new IOException(String.format("Cannot create file %s", TEMPLATE_DIR.getName()));
+                for (String fn : new String[]{"logo.png", "re.xml", "tt.xml"})
+                    IOUtils.copy(Application.class.getResourceAsStream(String.format("/templates/%s", fn)),
+                            new FileOutputStream(new File(TEMPLATE_DIR, fn)));
+            }
+            catch (Exception ex) {
+                new SMessageBox(mainShell, SWT.ICON_WARNING)
+                        .title("Ошибка копирования шаблонов")
+                        .message(ex)
+                        .open();
+            }
+        }
+    }
+
     private void fillTemplates() throws Exception {
-        File dir = new File("templates");
-        if (dir.exists()) {
-            File[] children = dir.listFiles(file ->
+        if (TEMPLATE_DIR.exists()) {
+            File[] children = TEMPLATE_DIR.listFiles(file ->
                     !file.isDirectory() && file.getName().toLowerCase().endsWith(".xml"));
             if (children != null) {
                 for (File file : children)
@@ -126,7 +148,7 @@ public final class Application implements ShieldTarget {
         mainShell.setMenuBar(menu);
 
         Menu fileMenu = new SMenu(menu, "Файл").menu();
-        new SMenuItem(fileMenu, "Выход\tAlt+F4", mainShell::close);
+        new SMenuItem(fileMenu, "Выход", mainShell::close);
 
         Menu editMenu = new SMenu(menu, "Правка").menu();
         Menu templateMenu = new SMenu(editMenu, "Шаблон").menu();
@@ -145,7 +167,14 @@ public final class Application implements ShieldTarget {
     public void generate(List<Shield> shields) {
         Display.getCurrent().syncExec(() -> {
             try {
-                Program.launch(selectedTemplate.generate(shields).getName());
+                if (!shields.isEmpty()) {
+                    selectedTemplate
+                            .generate(shields)
+                            .toFile(OUT_FILE);
+                    Program.launch(OUT_FILE.getName());
+                }
+                else
+                    throw new ShieldException("Список не заполнен");
             }
             catch (Exception ex) {
                 new SMessageBox(mainShell, SWT.ICON_ERROR)
@@ -160,9 +189,10 @@ public final class Application implements ShieldTarget {
     public void generateNow(Shield shield) {
         Display.getCurrent().syncExec(() -> {
             try {
-                List<Shield> shields = new ArrayList<>();
-                shields.add(shield);
-                Program.launch(selectedTemplate.generate(shields).getName());
+                selectedTemplate
+                        .generate(shield)
+                        .toFile(OUT_FILE);
+                Program.launch(OUT_FILE.getName());
             }
             catch (Exception ex) {
                 new SMessageBox(mainShell, SWT.ICON_ERROR)

@@ -94,6 +94,13 @@ public final class STable {
         return shields;
     }
 
+    public Integer shieldsCount() {
+        int count = 0;
+        for (Shield shield : shields)
+            count += shield.count();
+        return count;
+    }
+
     public Table table() {
         return table;
     }

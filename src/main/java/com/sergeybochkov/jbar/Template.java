@@ -15,12 +15,11 @@ import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 public final class Template {
-
-    public static final String OUT_NAME = "main.svg";
 
     private static final int A4_PAPER_PIXELS = 660;
 
@@ -39,19 +38,23 @@ public final class Template {
                 "";
     }
 
-    public File toFile() throws Exception {
+    public void toFile(File file) throws Exception {
         StringWriter writer = new StringWriter();
         TransformerFactory.newInstance().newTransformer()
                 .transform(new DOMSource(document), new StreamResult(writer));
-        File outFile = new File(OUT_NAME);
-        try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8")) {
+        try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(file), "UTF-8")) {
             fileWriter.write(writer.toString());
         }
-        return outFile;
     }
 
-    public File generate(List<Shield> shields) throws Exception {
-        Rectangle rect = getTemplateBounds();
+    public Template generate(Shield shield) throws Exception {
+        List<Shield> shields = new ArrayList<>();
+        shields.add(shield);
+        return generate(shields);
+    }
+
+    public Template generate(List<Shield> shields) throws Exception {
+        Rectangle rect = templateBounds();
         Element root = document.getDocumentElement();
         Node defs = root.getElementsByTagName("defs").item(0);
         Node g = root.getElementsByTagName("g").item(0);
@@ -84,7 +87,7 @@ public final class Template {
             }
         }
         document.normalizeDocument();
-        return toFile();
+        return this;
     }
 
     private void pasteDateAndVerificator(Shield shield, Element element) {
@@ -104,7 +107,7 @@ public final class Template {
 
     private String pasteLogo() throws IOException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            File logo = new File(System.getProperty("user.dir"), "templates/logo.png");
+            File logo = new File(Application.TEMPLATE_DIR, "logo.png");
             BufferedImage img = ImageIO.read(logo);
             ImageIO.write(img, "png", out);
             return String.format("data:image/png;base64,%s",
@@ -139,7 +142,7 @@ public final class Template {
         }
     }
 
-    private Rectangle getTemplateBounds() {
+    private Rectangle templateBounds() {
         Node node = document.getElementsByTagName("rect").item(0);
         Element element = (Element) node;
         return new Rectangle(

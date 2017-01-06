@@ -79,12 +79,12 @@ public final class Gui {
                 .fill()
                 .span(2);
 
-        new SButton(shell, "Очистить", table::removeAll)
+        new SButton(shell, "Очистить", this::defaults)
                 .left();
         new SButton(shell, "Сгенерировать", () -> target.generate(table.items()))
                 .right();
 
-        status = new SLabel(shell, "")
+        status = new SLabel(shell, "Всего наклеек: 0")
                 .left()
                 .fill()
                 .span(2)
@@ -119,7 +119,7 @@ public final class Gui {
                 verificators.add(verificators.getText());
                 verificatorList.add(verificators.getText());
             }
-            status.setText(String.format("Всего наклеек: %s", shield.count()));
+            status.setText(String.format("Всего наклеек: %s", table.shieldsCount()));
         }
         catch (Exception ex) {
             new SMessageBox(shell, SWT.ICON_ERROR)
@@ -144,5 +144,15 @@ public final class Gui {
 
     public String[] verificators() {
         return verificatorList.toArray(new String[verificatorList.size()]);
+    }
+
+    public void defaults() {
+        department.setText("");
+        count.setText("");
+        months.select(Calendar.getInstance().get(Calendar.MONTH));
+        years.setText(String.format("%s", Calendar.getInstance().get(Calendar.YEAR)));
+        verificators.setText("");
+        table.removeAll();
+        status.setText("Всего наклеек: 0");
     }
 }

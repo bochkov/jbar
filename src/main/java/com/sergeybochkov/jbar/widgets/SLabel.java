@@ -36,7 +36,7 @@ public final class SLabel {
 
     public SLabel fill() {
         GridData data = (GridData) label.getLayoutData();
-        data.horizontalAlignment |= GridData.FILL;
+        data.horizontalAlignment = GridData.FILL;
         data.grabExcessHorizontalSpace = true;
         label.setLayoutData(data);
         return this;
