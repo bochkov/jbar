@@ -1,32 +1,28 @@
 package com.sergeybochkov.jbar;
 
+import java.util.List;
+import java.util.*;
+
 import com.sergeybochkov.jbar.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
 public final class Gui {
 
-    private static final String[] MONTHS = {"Январь", "Февраль", "Март", "Апрель",
-            "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"};
-    private static final String[] FIELDS = {"Подразделение", "Дата след. поверки",
-            "Поверитель", "Количество"};
+    private static final String[] MONTHS = {"Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"};
+    private static final String[] FIELDS = {"Подразделение", "Дата след. поверки", "Поверитель", "Количество"};
 
     private final Shell shell;
-
-    private final List<String> verificatorList = new ArrayList<>();
-
     private final Text department;
     private final Text count;
-    private final Combo months;
-    private final Combo years;
-    private final Combo verificators;
+    private final Combo month;
+    private final Combo year;
+    private final Combo verifier;
     private final STable table;
     private final Label status;
+
+    private final Set<String> verifiers = new TreeSet<>();
 
     public Gui(Shell shell, ShieldTarget target) {
         this.shell = shell;
@@ -47,7 +43,7 @@ public final class Gui {
 
         new SLabel(group, "Месяц")
                 .right();
-        months = new SCombo(group, true)
+        month = new SCombo(group, true)
                 .fill()
                 .items(MONTHS)
                 .select(Calendar.getInstance().get(Calendar.MONTH))
@@ -55,15 +51,15 @@ public final class Gui {
 
         new SLabel(group, "Год")
                 .right();
-        years = new SCombo(group, false)
+        year = new SCombo(group, false)
                 .fill()
-                .items(years())
+                .items(yearItems())
                 .set(String.format("%s", Calendar.getInstance().get(Calendar.YEAR) + 1))
                 .combo();
 
         new SLabel(group, "Поверитель")
                 .right();
-        verificators = new SCombo(group, false)
+        verifier = new SCombo(group, false)
                 .fill()
                 .combo();
 
@@ -73,7 +69,16 @@ public final class Gui {
                 .right()
                 .composite();
         new SButton(composite, "В список", this::add);
-        new SButton(composite, "Сейчас", () -> target.generateNow(shield()));
+        new SButton(composite, "Быстрая печать", () -> {
+            try {
+                target.generate(Collections.singletonList(shield()));
+            } catch (Exception ex) {
+                new SMessageBox(shell, SWT.ICON_ERROR)
+                        .title("Ошибка")
+                        .message(ex)
+                        .open();
+            }
+        });
 
         table = new STable(shell, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION, FIELDS)
                 .fill()
@@ -94,34 +99,31 @@ public final class Gui {
         shell.setSize(450, 600);
     }
 
-    public String[] years() {
-        java.util.List<String> years = new ArrayList<>();
+    public List<String> yearItems() {
+        List<String> items = new ArrayList<>();
         int curYear = Calendar.getInstance().get(Calendar.YEAR);
         for (int i = curYear - 5; i <= curYear + 5; ++i)
-            years.add(String.format("%s", i));
-        return years.toArray(new String[years.size()]);
+            items.add(String.format("%s", i));
+        return items;
     }
 
-    private Shield shield() {
+    private Shield shield() throws NumberFormatException {
         return new Shield(
-                verificators.getText(),
-                months.getSelectionIndex(),
-                Integer.parseInt(years.getText()),
+                verifier.getText(),
+                month.getSelectionIndex(),
+                Integer.parseInt(year.getText()),
                 department.getText(),
-                Integer.parseInt(count.getText()));
+                Integer.parseInt(count.getText())
+        );
     }
 
     private void add() {
         try {
             Shield shield = shield();
             table.add(shield);
-            if (!verificatorList.contains(verificators.getText())) {
-                verificators.add(verificators.getText());
-                verificatorList.add(verificators.getText());
-            }
+            verifiers.add(verifier.getText());
             status.setText(String.format("Всего наклеек: %s", table.shieldsCount()));
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             new SMessageBox(shell, SWT.ICON_ERROR)
                     .title("Ошибка")
                     .message(ex)
@@ -131,27 +133,29 @@ public final class Gui {
 
     public void removeSelected() {
         table.removeSelected();
+        status.setText(String.format("Всего наклеек: %s", table.shieldsCount()));
     }
 
     public void removeAll() {
         table.removeAll();
+        status.setText(String.format("Всего наклеек: %s", table.shieldsCount()));
     }
 
-    public void updateVerificators(List<String> verificators) {
-        this.verificatorList.addAll(verificators);
-        this.verificators.setItems(verificators.toArray(new String[verificatorList.size()]));
+    public void updateVerifiers(List<String> verifiers) {
+        this.verifiers.addAll(verifiers);
+        this.verifier.setItems(this.verifiers.toArray(String[]::new));
     }
 
-    public String[] verificators() {
-        return verificatorList.toArray(new String[verificatorList.size()]);
+    public Set<String> verifiers() {
+        return verifiers;
     }
 
     public void defaults() {
         department.setText("");
         count.setText("");
-        months.select(Calendar.getInstance().get(Calendar.MONTH));
-        years.setText(String.format("%s", Calendar.getInstance().get(Calendar.YEAR)));
-        verificators.setText("");
+        month.select(Calendar.getInstance().get(Calendar.MONTH));
+        year.setText(String.format("%s", Calendar.getInstance().get(Calendar.YEAR)));
+        verifier.setText("");
         table.removeAll();
         status.setText("Всего наклеек: 0");
     }

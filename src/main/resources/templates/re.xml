@@ -3,7 +3,7 @@
 <svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      width="100%" height="100%">
-    <description>Электрорадиотехнические</description>
+    <desc>Электрорадиотехнические</desc>
     <defs>
         <g>
             <rect x="0" y="0" width="165" height="115" fill="none" stroke="black" stroke-width="2px"/>
@@ -18,7 +18,7 @@
                 Поверитель
             </text>
             <text x="85" y="60" font-family="Tahoma" font-size="8px" font-weight="bold">
-                {{verificator}}
+                {{verifier}}
             </text>
 
             <text x="85" y="75" font-family="Tahoma" font-size="7px" font-weight="bold" font-style="italic">

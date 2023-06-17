@@ -1,5 +1,7 @@
 package com.sergeybochkov.jbar.widgets;
 
+import java.util.Collection;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
@@ -24,6 +26,11 @@ public final class SCombo {
 
     public SCombo items(String... items) {
         combo.setItems(items);
+        return this;
+    }
+
+    public SCombo items(Collection<String> items) {
+        combo.setItems(items.toArray(String[]::new));
         return this;
     }
 

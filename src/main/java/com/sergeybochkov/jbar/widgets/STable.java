@@ -1,5 +1,9 @@
 package com.sergeybochkov.jbar.widgets;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.sergeybochkov.jbar.Shield;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -8,10 +12,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public final class STable {
 

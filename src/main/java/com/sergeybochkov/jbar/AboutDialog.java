@@ -1,5 +1,10 @@
 package com.sergeybochkov.jbar;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
+
+import org.apache.commons.io.IOUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,8 +17,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
 
-import java.util.Calendar;
-
 public final class AboutDialog extends Dialog {
 
     private static final int START_YEAR = 2011;
@@ -25,16 +28,7 @@ public final class AboutDialog extends Dialog {
         shell = new Shell(getParent(), getStyle());
         shell.setText("О программе");
         shell.setImage(getParent().getImage());
-        createContents();
-    }
 
-    public void open() {
-        shell.pack();
-        shell.setLocation(center());
-        shell.open();
-    }
-
-    private void createContents() {
         shell.setLayout(new GridLayout(1, true));
         Label iLabel = new Label(shell, SWT.CENTER);
         iLabel.setImage(new Image(null, AboutDialog.class.getResourceAsStream("/images/barcode.png")));
@@ -42,8 +36,17 @@ public final class AboutDialog extends Dialog {
 
         Label title = new Label(shell, SWT.CENTER);
         title.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        title.setText("JBar v. 0.9");
+        title.setText("JBar");
         title.setFont(new Font(getParent().getDisplay(), "Sans", 16, SWT.BOLD));
+
+        Label version = new Label(shell, SWT.CENTER);
+        version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        version.setFont(new Font(getParent().getDisplay(), "Sans", 12, SWT.NORMAL));
+        try {
+            version.setText("v." + IOUtils.resourceToString("/version.txt", StandardCharsets.UTF_8));
+        } catch (IOException ex) {
+            version.setText("");
+        }
 
         Label description = new Label(shell, SWT.CENTER);
         description.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -51,17 +54,21 @@ public final class AboutDialog extends Dialog {
 
         Label copy = new Label(shell, SWT.CENTER);
         copy.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        copy.setText(String.format("© Бочков С.А., %s", copyStr()));
+        copy.setText("© Бочков С.А.");
 
-        Link link = new Link(shell, SWT.CENTER);
-        link.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        link.setText(" <a>bochkov.sa@gmail.com</a> ");
+        Link link = new Link(shell, SWT.NONE);
+        link.setLayoutData(new GridData(SWT.CENTER, SWT.NONE, true, false));
+        link.setText("<a>bochkov.sa@gmail.com</a>");
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent selectionEvent) {
                 Program.launch(String.format("mailto:%s?subject=JBar", selectionEvent.text));
             }
         });
+
+        Label years = new Label(shell, SWT.CENTER);
+        years.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        years.setText(copyStr());
 
         Label strut = new Label(shell, SWT.CENTER);
         strut.setText("");
@@ -77,6 +84,12 @@ public final class AboutDialog extends Dialog {
         });
         shell.setDefaultButton(okButton);
         okButton.forceFocus();
+    }
+
+    public void open() {
+        shell.pack();
+        shell.setLocation(center());
+        shell.open();
     }
 
     private String copyStr() {

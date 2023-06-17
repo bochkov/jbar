@@ -1,8 +1,21 @@
 package com.sergeybochkov.jbar;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.sergeybochkov.jbar.widgets.SMenu;
 import com.sergeybochkov.jbar.widgets.SMenuItem;
 import com.sergeybochkov.jbar.widgets.SMessageBox;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -14,27 +27,22 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-
+@Slf4j
 public final class Application implements ShieldTarget {
 
-    public static final File APP_DIR = new File(System.getProperty("user.home"), ".jbar");
-    public static final File TEMPLATE_DIR = new File(APP_DIR, "templates");
-    public static final File INI_FILE = new File(APP_DIR, "jbar.ini");
-    public static final File OUT_FILE = new File(APP_DIR, "main.svg");
+    private static final File APP_DIR = new File(System.getProperty("user.home"), ".jbar");
+    private static final File TEMPLATE_DIR = new File(APP_DIR, "templates");
+    private static final File INI_FILE = new File(APP_DIR, "jbar.ini");
+    private static final File OUT_FILE = new File(APP_DIR, "main.svg");
+
+    private static final String[] TEMPLATE_NAMES = new String[]{"logo.png", "re.xml", "tt.xml"};
 
     private final Display display;
     private final Shell mainShell;
     private final Gui gui;
-    private final AboutDialog aboutDialog;
 
     private final List<Template> templates = new ArrayList<>();
-
-    private Template selectedTemplate;
+    private final AtomicReference<Template> selectedTemplate = new AtomicReference<>();
 
     public Application() {
         display = new Display();
@@ -42,105 +50,67 @@ public final class Application implements ShieldTarget {
         mainShell.setText("JBar");
         mainShell.setImage(new Image(display, Application.class.getResourceAsStream("/images/barcode.png")));
         gui = new Gui(mainShell, this);
-        aboutDialog = new AboutDialog(mainShell);
+
         createProgramFolder();
-        try {
-            fillTemplates();
-        }
-        catch (Exception ex) {
-            new SMessageBox(mainShell, SWT.ICON_WARNING)
-                    .title("Ошибка")
-                    .message(ex)
-                    .open();
-        }
+        fillTemplates();
         createMenu();
     }
 
-    private List<String> readVerificators() {
-        List<String> verificators = new ArrayList<>();
-        try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                        new FileInputStream(INI_FILE), "UTF-8"))) {
-            String line;
-            while ((line = in.readLine()) != null)
-                verificators.add(line);
+    private List<String> readVerifiers() {
+        try (FileReader reader = new FileReader(INI_FILE, StandardCharsets.UTF_8)) {
+            return IOUtils.readLines(reader);
+        } catch (IOException ex) {
+            LOG.warn(ex.getMessage(), ex);
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return verificators;
+        return Collections.emptyList();
     }
 
-    private void saveVerificators(String... verificators) {
-        try (BufferedWriter out = new BufferedWriter(
-                    new OutputStreamWriter(
-                            new FileOutputStream(INI_FILE), "UTF-8"))) {
-            Arrays.stream(verificators)
-                    .filter(verificator -> !verificator.isEmpty())
-                    .forEach(verificator -> {
-                        try {
-                            out.write(verificator + '\n');
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+    private void saveVerifiers(Collection<String> verifiers) {
+        try (FileWriter writer = new FileWriter(INI_FILE, StandardCharsets.UTF_8)) {
+            IOUtils.writeLines(verifiers, "\n", writer);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOG.warn(ex.getMessage(), ex);
         }
     }
 
     private void createProgramFolder() {
-        if (!APP_DIR.exists()) {
-            try {
-                if (!TEMPLATE_DIR.exists() && !TEMPLATE_DIR.mkdirs())
-                    throw new IOException(String.format("Cannot create file %s", TEMPLATE_DIR.getName()));
-                for (String fn : new String[]{"logo.png", "re.xml", "tt.xml"})
-                    IOUtils.copy(Application.class.getResourceAsStream(String.format("/templates/%s", fn)),
-                            new FileOutputStream(new File(TEMPLATE_DIR, fn)));
+        try {
+            if (!APP_DIR.exists() && !APP_DIR.mkdirs()) {
+                throw new IOException("Папка программы отсутствует и не может быть создана");
             }
-            catch (Exception ex) {
-                new SMessageBox(mainShell, SWT.ICON_WARNING)
-                        .title("Ошибка копирования шаблонов")
-                        .message(ex)
-                        .open();
+            if (!TEMPLATE_DIR.exists() && !TEMPLATE_DIR.mkdirs()) {
+                throw new IOException("Папка шаблонов отстутствует и не может быть создана");
             }
+            for (String fn : TEMPLATE_NAMES) {
+                URL url = Application.class.getResource(String.format("/templates/%s", fn));
+                if (url != null) {
+                    IOUtils.copy(url, new File(TEMPLATE_DIR, fn));
+                }
+            }
+        } catch (Exception ex) {
+            new SMessageBox(mainShell, SWT.ICON_WARNING)
+                    .title("Ошибка копирования шаблонов")
+                    .message(ex)
+                    .open();
         }
     }
 
-    private void fillTemplates() throws Exception {
+    private void fillTemplates() {
         if (TEMPLATE_DIR.exists()) {
             File[] children = TEMPLATE_DIR.listFiles(file ->
                     !file.isDirectory() && file.getName().toLowerCase().endsWith(".xml"));
             if (children != null) {
-                for (File file : children)
-                    templates.add(new Template(file));
+                for (File file : children) {
+                    try {
+                        Template tmpl = Template.fromFile(file);
+                        templates.add(tmpl);
+                        LOG.info("registered template file='{}', description='{}'", file.getAbsolutePath(), tmpl.description());
+                    } catch (Exception ex) {
+                        LOG.warn(ex.getMessage(), ex);
+                    }
+                }
             }
         }
-    }
-
-    public void mainLoop() {
-        gui.updateVerificators(readVerificators());
-        mainShell.setLocation(center());
-        mainShell.open();
-        while (!mainShell.isDisposed())
-            if (!display.readAndDispatch())
-                display.sleep();
-        saveVerificators(gui.verificators());
-        display.dispose();
-    }
-
-    public static void main(String[] args) {
-        new Application().mainLoop();
-    }
-
-    private Point center() {
-        Rectangle bounds = (mainShell.getParent() == null) ?
-                mainShell.getDisplay().getBounds() :
-                mainShell.getParent().getBounds();
-        Point dialogSize = mainShell.getSize();
-        return new Point(
-                bounds.x + (bounds.width - dialogSize.x) / 2,
-                bounds.y + (bounds.height - dialogSize.y) / 2);
     }
 
     private void createMenu() {
@@ -153,30 +123,30 @@ public final class Application implements ShieldTarget {
         Menu editMenu = new SMenu(menu, "Правка").menu();
         Menu templateMenu = new SMenu(editMenu, "Шаблон").menu();
         for (Template template : templates)
-            new SMenuItem(templateMenu, SWT.RADIO, template.description(), () -> this.selectedTemplate = template)
+            new SMenuItem(templateMenu, SWT.RADIO, template.description(), () -> this.selectedTemplate.set(template))
                     .checked(templates.indexOf(template) == 0);
         new MenuItem(editMenu, SWT.SEPARATOR);
         new SMenuItem(editMenu, "Удалить выбранные", gui::removeSelected);
         new SMenuItem(editMenu, "Очистить", gui::removeAll);
 
         Menu helpMenu = new SMenu(menu, "Помощь").menu();
-        new SMenuItem(helpMenu, "О программе", aboutDialog::open);
+        new SMenuItem(helpMenu, "О программе", () -> new AboutDialog(mainShell).open());
     }
 
     @Override
     public void generate(List<Shield> shields) {
         Display.getCurrent().syncExec(() -> {
             try {
-                if (!shields.isEmpty()) {
-                    selectedTemplate
-                            .generate(shields)
-                            .toFile(OUT_FILE);
-                    Program.launch(OUT_FILE.getName());
-                }
-                else
-                    throw new ShieldException("Список не заполнен");
-            }
-            catch (Exception ex) {
+                if (selectedTemplate.get() == null)
+                    throw new IOException("Шаблон не выбран");
+                if (shields.isEmpty())
+                    throw new IOException("Список не заполнен");
+
+                selectedTemplate.get()
+                        .generate(shields)
+                        .toFile(OUT_FILE);
+                Program.launch(OUT_FILE.getAbsolutePath());
+            } catch (Exception ex) {
                 new SMessageBox(mainShell, SWT.ICON_ERROR)
                         .title("Ошибка")
                         .message(ex)
@@ -185,21 +155,30 @@ public final class Application implements ShieldTarget {
         });
     }
 
-    @Override
-    public void generateNow(Shield shield) {
-        Display.getCurrent().syncExec(() -> {
-            try {
-                selectedTemplate
-                        .generate(shield)
-                        .toFile(OUT_FILE);
-                Program.launch(OUT_FILE.getName());
-            }
-            catch (Exception ex) {
-                new SMessageBox(mainShell, SWT.ICON_ERROR)
-                        .title("Ошибка")
-                        .message(ex)
-                        .open();
-            }
-        });
+    private Point center() {
+        Rectangle bounds = (mainShell.getParent() == null) ?
+                mainShell.getDisplay().getBounds() :
+                mainShell.getParent().getBounds();
+        Point dialogSize = mainShell.getSize();
+        return new Point(
+                bounds.x + (bounds.width - dialogSize.x) / 2,
+                bounds.y + (bounds.height - dialogSize.y) / 2
+        );
+    }
+
+    public void mainLoop() {
+        gui.updateVerifiers(readVerifiers());
+        mainShell.setLocation(center());
+        mainShell.open();
+        while (!mainShell.isDisposed())
+            if (!display.readAndDispatch())
+                display.sleep();
+        saveVerifiers(gui.verifiers());
+        display.dispose();
+    }
+
+    public static void main(String[] args) {
+        LOG.info("Application started");
+        new Application().mainLoop();
     }
 }

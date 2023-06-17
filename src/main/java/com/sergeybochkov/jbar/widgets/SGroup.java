@@ -15,7 +15,6 @@ public final class SGroup {
         group.setText("Исходные данные");
         group.setLayout(new GridLayout(2, false));
         GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-        //gridData.horizontalAlignment = GridData.FILL_HORIZONTAL;
         gridData.horizontalSpan = 2;
         group.setLayoutData(gridData);
     }
