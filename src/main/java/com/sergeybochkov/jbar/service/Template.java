@@ -1,12 +1,13 @@
-package com.sergeybochkov.jbar;
+package com.sergeybochkov.jbar.service;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
-import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -14,11 +15,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.sergeybochkov.jbar.widgets.SBarcode;
+import com.sergeybochkov.jbar.model.Shield;
 import lombok.RequiredArgsConstructor;
-import net.sourceforge.barbecue.Barcode;
-import net.sourceforge.barbecue.BarcodeException;
-import net.sourceforge.barbecue.output.OutputException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,19 +30,27 @@ public final class Template {
     private static final TransformerFactory TFACTORY = TransformerFactory.newInstance();
     private static final int A4_PAPER_PIXELS = 660;
 
-    private final File templateDir;
     private final Document document;
 
     public static Template fromFile(File file) throws SAXException, IOException, ParserConfigurationException {
         Document doc = DFACTORY.newDocumentBuilder().parse(file);
-        return new Template(file.getParentFile(), doc);
+        return new Template(doc);
     }
 
     public String description() {
-        NodeList nodeList = document.getDocumentElement().getElementsByTagName("desc");
-        return nodeList.getLength() > 0 ?
-                nodeList.item(0).getTextContent() :
-                "";
+        NodeList nodes = document.getDocumentElement().getElementsByTagName("desc");
+        return nodes.getLength() > 0 ? nodes.item(0).getTextContent() : "";
+    }
+
+    public Integer index() {
+        NodeList nodes = document.getDocumentElement().getElementsByTagName("metadata");
+        if (nodes.getLength() > 0) {
+            Node node = nodes.item(0).getAttributes().getNamedItem("tabindex");
+            if (node != null) {
+                return Integer.parseInt(node.getNodeValue());
+            }
+        }
+        return -1;
     }
 
     public void toFile(File file) throws IOException {
@@ -67,10 +73,12 @@ public final class Template {
         int countInRow = 0;
         for (Shield shield : shields) {
             if (g instanceof Element) {
-                Element element = (Element) g.cloneNode(true);  // делаем шаблон
+                Element element = (Element) g.cloneNode(true);
                 element.setAttribute("id", String.valueOf(++count));
-                pasteDateAndVerifier(shield, element);  // вставляем дату поверки и поверителя
-                pasteBarAndLogo(shield, element);  // вставялем штрихкод
+                pasteImageById(element, "barcode", shield.barcode());
+                pasteImageById(element, "logo", shield.logo());
+                pasteStringByMark(element, "{{verifier}}", shield.verifier());
+                pasteStringByMark(element, "{{date}}", shield.longDate());
                 defs.appendChild(element);
             }
 
@@ -94,60 +102,27 @@ public final class Template {
         return this;
     }
 
-    private void pasteDateAndVerifier(Shield shield, Element element) {
+    private void pasteStringByMark(Element element, String mark, String value) {
         NodeList list = element.getElementsByTagName("text");
-        for (int j = 0; j < list.getLength(); ++j) {
-            Node child = list.item(j);
+        for (int i = 0; i < list.getLength(); ++i) {
+            Node child = list.item(i);
             if (child instanceof Element el) {
                 String data = el.getTextContent().trim();
-                if (data.contains("{{verifier}}"))
-                    el.setTextContent(data.replace("{{verifier}}", shield.verification()));
-                if (data.contains("{{date}}"))
-                    el.setTextContent(data.replace("{{date}}", shield.longDate()));
+                if (data.contains(mark)) {
+                    el.setTextContent(data.replace(mark, value));
+                }
             }
         }
     }
 
-    private void pasteBarAndLogo(Shield shield, Element element) throws IOException {
+    private void pasteImageById(Element element, String id, byte[] img) {
         NodeList list = element.getElementsByTagName("image");
         for (int j = 0; j < list.getLength(); ++j) {
             Node child = list.item(j);
-            if (child instanceof Element el) {
-                if (el.getAttribute("id").equals("barcode"))
-                    el.setAttribute("xlink:href", generateBarcode(shield));
-                if (el.getAttribute("id").equals("logo"))
-                    el.setAttribute("xlink:href", pasteLogo());
+            if (child instanceof Element el && el.getAttribute("id").equals(id)) {
+                String data = String.format("data:image/png;base64,%s", Base64.getEncoder().encodeToString(img));
+                el.setAttribute("xlink:href", data);
             }
-        }
-    }
-
-    private String generateBarcode(Shield shield) throws IOException {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Barcode barcode = new SBarcode(shield).barcode();
-            BufferedImage image = new BufferedImage(
-                    barcode.getWidth() - 2, // поправки на какие-то левые пиксели
-                    barcode.getHeight() - 2,  // поправки на какие-то левые пиксели
-                    BufferedImage.TYPE_BYTE_BINARY
-            );
-            barcode.draw((Graphics2D) image.getGraphics(), 0, 0);
-            ImageIO.write(image, "PNG", out);
-            out.flush();
-            return String.format("data:image/png;base64,%s",
-                    Base64.getEncoder().encodeToString(out.toByteArray())
-            );
-        } catch (BarcodeException | OutputException ex) {
-            throw new IOException(ex);
-        }
-    }
-
-    private String pasteLogo() throws IOException {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            File logo = new File(templateDir, "logo.png");
-            BufferedImage img = ImageIO.read(logo);
-            ImageIO.write(img, "png", out);
-            return String.format("data:image/png;base64,%s",
-                    Base64.getEncoder().encodeToString(out.toByteArray())
-            );
         }
     }
 

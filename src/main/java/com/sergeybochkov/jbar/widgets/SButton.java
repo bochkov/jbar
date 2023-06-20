@@ -1,5 +1,7 @@
 package com.sergeybochkov.jbar.widgets;
 
+import java.util.function.Consumer;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -7,48 +9,29 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-public final class SButton {
+public final class SButton implements SControl<Button, SButton> {
 
     private final Button button;
 
-    public SButton(Composite composite, String text) {
-        this(composite, text, () -> {});
-    }
-
-    public SButton(Composite composite, String text, final Selected selected) {
+    public SButton(Composite composite, String text, final Consumer<SelectionEvent> consumer) {
         button = new Button(composite, SWT.PUSH);
         button.setText(text);
+        button.setLayoutData(new GridData());
         button.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent selectionEvent) {
-                selected.select();
+            public void widgetSelected(SelectionEvent e) {
+                consumer.accept(e);
             }
         });
-        button.setLayoutData(new GridData());
     }
 
-    public SButton right() {
-        GridData data = (GridData) button.getLayoutData();
-        data.horizontalAlignment = GridData.END;
-        button.setLayoutData(data);
+    @Override
+    public SButton parent() {
         return this;
     }
 
-    public SButton left() {
-        GridData data = (GridData) button.getLayoutData();
-        data.horizontalAlignment = GridData.BEGINNING;
-        button.setLayoutData(data);
-        return this;
-    }
-
-    public SButton span(int span) {
-        GridData data = (GridData) button.getLayoutData();
-        data.horizontalSpan = span;
-        button.setLayoutData(data);
-        return this;
-    }
-
-    public Button button() {
+    @Override
+    public Button widget() {
         return button;
     }
 }

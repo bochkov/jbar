@@ -5,7 +5,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
-public final class SText {
+public final class SText implements SControl<Text, SText> {
 
     private final Text text;
 
@@ -19,15 +19,13 @@ public final class SText {
         this.text.setLayoutData(new GridData());
     }
 
-    public SText fill() {
-        GridData data = (GridData) text.getLayoutData();
-        data.horizontalAlignment = GridData.FILL;
-        data.grabExcessHorizontalSpace = true;
-        text.setLayoutData(data);
+    @Override
+    public SText parent() {
         return this;
     }
 
-    public Text text() {
+    @Override
+    public Text widget() {
         return text;
     }
 }

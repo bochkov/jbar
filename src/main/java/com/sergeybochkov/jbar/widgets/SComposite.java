@@ -5,36 +5,23 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 
-public final class SComposite {
+public final class SComposite implements SControl<Composite, SComposite> {
 
     private final Composite composite;
 
-    public SComposite(Composite composite) {
+    public SComposite(Composite composite, Layout layout) {
         this.composite = new Composite(composite, SWT.NONE);
+        this.composite.setLayout(layout);
         this.composite.setLayoutData(new GridData());
     }
 
-    public SComposite layout(Layout layout) {
-        this.composite.setLayout(layout);
+    @Override
+    public SComposite parent() {
         return this;
     }
 
-    public SComposite right() {
-        GridData data = (GridData) composite.getLayoutData();
-        data.horizontalAlignment = GridData.END;
-        data.grabExcessHorizontalSpace = true;
-        composite.setLayoutData(data);
-        return this;
-    }
-
-    public SComposite span(int span) {
-        GridData data = (GridData) composite.getLayoutData();
-        data.horizontalSpan = span;
-        composite.setLayoutData(data);
-        return this;
-    }
-
-    public Composite composite() {
+    @Override
+    public Composite widget() {
         return composite;
     }
 }

@@ -1,28 +1,30 @@
 package com.sergeybochkov.jbar.widgets;
 
+import java.util.function.Consumer;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
-public final class SMenuItem {
+public final class SMenuItem implements SWidget {
 
     private final MenuItem menuItem;
-    private final Selected  selected;
+    private final Consumer<SelectionEvent> selected;
 
-    public SMenuItem(Menu menu, String text, Selected selected) {
+    public SMenuItem(Menu menu, String text, Consumer<SelectionEvent> selected) {
         this(menu, SWT.NONE, text, selected);
     }
 
-    public SMenuItem(Menu menu, int style, String text, Selected selected) {
+    public SMenuItem(Menu menu, int style, String text, Consumer<SelectionEvent> sel) {
         menuItem = new MenuItem(menu, style);
         menuItem.setText(text);
-        this.selected = selected;
+        this.selected = sel;
         menuItem.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(SelectionEvent selectionEvent) {
-                selected.select();
+            public void widgetSelected(SelectionEvent ev) {
+                selected.accept(ev);
             }
         });
     }
@@ -30,11 +32,7 @@ public final class SMenuItem {
     public SMenuItem checked(boolean checked) {
         menuItem.setSelection(checked);
         if (checked)
-            selected.select();
+            selected.accept(null);
         return this;
-    }
-
-    public MenuItem menuItem() {
-        return menuItem;
     }
 }
