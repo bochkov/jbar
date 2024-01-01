@@ -21,7 +21,7 @@ public final class AppProps extends Properties {
 
     public static final String TITLE = "JBar";
 
-    public static final File APP_DIR = new File(System.getProperty("user.home"), ".jbar");
+    public static final File APP_DIR = new File(System.getProperty("user.home"), ".config/jbar");
     public static final File TMPL_DIR = new File(APP_DIR, "templates");
     public static final File OUT_FILE = new File(APP_DIR, "main.svg");
     public static final File INI_FILE = new File(APP_DIR, "jbar.ini");

@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id 'application'
     id 'idea'
+    id 'com.github.ben-manes.versions' version '0.50.0'
 }
 
 ext {
@@ -18,28 +19,29 @@ ext {
 group = 'com.sergeybochkov'
 version = '2.0'
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation("org.eclipse.platform:org.eclipse.swt.${swtPlatform}:3.124.0") {
+    implementation("org.eclipse.platform:org.eclipse.swt.${swtPlatform}:3.124.200") {
         transitive = false
     }
     implementation 'net.sourceforge.barbecue:barbecue:1.5-beta1'
-    implementation 'commons-io:commons-io:2.11.0'
-    implementation 'ch.qos.logback:logback-classic:1.4.8'
+    implementation 'commons-io:commons-io:2.15.1'
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
 
-    compileOnly 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
-
-    testCompileOnly 'org.projectlombok:lombok:1.18.28'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
 
 test {
@@ -48,10 +50,11 @@ test {
 
 application {
     mainClass = 'com.sergeybochkov.jbar.Application'
-    applicationDefaultJvmArgs = ["-Xmx64m", "-XstartOnFirstThread", "-Xdock:name=JBar"]
+    applicationDefaultJvmArgs = ["-Xmx64m", "-Dfile.encoding=UTF-8", "-XstartOnFirstThread", "-Xdock:name=JBar"]
 }
 
-task("macApp", dependsOn: 'build') {
+tasks.register('macApp') {
+    dependsOn 'build'
     doLast {
         def outDir = "$buildDir/macApp" as File
         def appDir = "$outDir/JBar.app" as File
