@@ -1,5 +1,9 @@
 package com.sergeybochkov.jbar;
 
+import com.sergeybochkov.jbar.service.Template;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,10 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import com.sergeybochkov.jbar.service.Template;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 
 @Slf4j
 public final class AppProps extends Properties {
@@ -46,7 +46,7 @@ public final class AppProps extends Properties {
             throw new IOException("Папка программы отсутствует и не может быть создана");
         }
         if (!TMPL_DIR.exists() && !TMPL_DIR.mkdirs()) {
-            throw new IOException("Папка шаблонов отстутствует и не может быть создана");
+            throw new IOException("Папка шаблонов отсутствует и не может быть создана");
         }
         for (String fn : templateNames()) {
             URL res = Application.class.getResource(String.format("/templates/%s", fn));

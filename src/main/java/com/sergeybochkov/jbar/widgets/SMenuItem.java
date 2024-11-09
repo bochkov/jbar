@@ -1,12 +1,12 @@
 package com.sergeybochkov.jbar.widgets;
 
-import java.util.function.Consumer;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+
+import java.util.function.Consumer;
 
 public final class SMenuItem implements SWidget {
 
@@ -29,10 +29,10 @@ public final class SMenuItem implements SWidget {
         });
     }
 
-    public SMenuItem checked(boolean checked) {
+    public void checked(boolean checked) {
         menuItem.setSelection(checked);
-        if (checked)
+        if (checked) {
             selected.accept(null);
-        return this;
+        }
     }
 }

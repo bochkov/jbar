@@ -1,13 +1,13 @@
 package com.sergeybochkov.jbar.widgets;
 
-import java.util.function.Consumer;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+
+import java.util.function.Consumer;
 
 public final class SButton implements SControl<Button, SButton> {
 

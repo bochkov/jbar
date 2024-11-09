@@ -1,20 +1,5 @@
 package com.sergeybochkov.jbar.service;
 
-import java.awt.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import com.sergeybochkov.jbar.model.Shield;
 import lombok.RequiredArgsConstructor;
 import org.w3c.dom.Document;
@@ -23,17 +8,32 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.awt.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
+
 @RequiredArgsConstructor
 public final class Template {
 
-    private static final DocumentBuilderFactory DFACTORY = DocumentBuilderFactory.newInstance();
-    private static final TransformerFactory TFACTORY = TransformerFactory.newInstance();
+    private static final DocumentBuilderFactory D_FACTORY = DocumentBuilderFactory.newInstance();
+    private static final TransformerFactory T_FACTORY = TransformerFactory.newInstance();
     private static final int A4_PAPER_PIXELS = 660;
 
     private final Document document;
 
     public static Template fromFile(File file) throws SAXException, IOException, ParserConfigurationException {
-        Document doc = DFACTORY.newDocumentBuilder().parse(file);
+        Document doc = D_FACTORY.newDocumentBuilder().parse(file);
         return new Template(doc);
     }
 
@@ -56,7 +56,7 @@ public final class Template {
     public void toFile(File file) throws IOException {
         try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
             StringWriter str = new StringWriter();
-            TFACTORY.newTransformer().transform(new DOMSource(document), new StreamResult(str));
+            T_FACTORY.newTransformer().transform(new DOMSource(document), new StreamResult(str));
             writer.write(str.toString());
         } catch (TransformerException ex) {
             throw new IOException(ex);

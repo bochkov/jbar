@@ -1,18 +1,18 @@
 package com.sergeybochkov.jbar.widgets;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
-public abstract class STableModel<T extends TableItemizable> {
+public abstract class STableModel<T extends ItemInTable> {
 
     private final Table table;
     private final List<T> items = new ArrayList<>();
@@ -35,7 +35,7 @@ public abstract class STableModel<T extends TableItemizable> {
     private void fireTableDataChanged() {
         table.removeAll();
         for (T item : items) {
-            new TableItem(table, SWT.NONE).setText(item.toItem());
+            new TableItem(table, SWT.NONE).setText(item.toRow());
         }
         notifyListeners();
     }

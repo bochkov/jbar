@@ -1,15 +1,8 @@
 package com.sergeybochkov.jbar;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.sergeybochkov.jbar.model.Shield;
 import com.sergeybochkov.jbar.model.ShieldTableModel;
 import com.sergeybochkov.jbar.service.Template;
-import com.sergeybochkov.jbar.util.RuDateFormat;
 import com.sergeybochkov.jbar.widgets.*;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.swt.SWT;
@@ -22,6 +15,13 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public final class ShlMain {
@@ -89,8 +89,9 @@ public final class ShlMain {
         new SLabel(group, "Месяц").right();
         month = new SCombo(group, true)
                 .hFill()
-                .items(RuDateFormat.MONTHS_I)
-                .select(Calendar.getInstance().get(Calendar.MONTH))
+                .items("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь")
+                .select(LocalDate.now().getMonth().ordinal())
                 .widget();
         month.addModifyListener(sourceValidation);
 
@@ -98,7 +99,7 @@ public final class ShlMain {
         year = new SCombo(group, false)
                 .hFill()
                 .items(yearItems())
-                .set(String.format("%s", Calendar.getInstance().get(Calendar.YEAR) + 1))
+                .set(String.valueOf(LocalDate.now().getYear() + 1))
                 .widget();
         year.addModifyListener(sourceValidation);
 
@@ -145,8 +146,8 @@ public final class ShlMain {
 
     public List<String> yearItems() {
         List<String> items = new ArrayList<>();
-        int curYear = Calendar.getInstance().get(Calendar.YEAR);
-        for (int i = curYear - 5; i <= curYear + 5; ++i)
+        int curYear = LocalDate.now().getYear();
+        for (int i = curYear - 2; i <= curYear + 3; ++i)
             items.add(String.format("%s", i));
         return items;
     }
@@ -154,10 +155,14 @@ public final class ShlMain {
     private Shield shield() {
         verifiers.add(verifier.getText());
         AppProps.getInstance().set(AppProps.VERIFIERS, verifiers);
-        return new Shield(
-                verifier.getText(),
-                month.getSelectionIndex(),
+        LocalDate date = LocalDate.of(
                 Integer.parseInt(year.getText()),
+                month.getSelectionIndex() + 1,
+                1
+        );
+        return new Shield(
+                date,
+                verifier.getText(),
                 department.getText(),
                 Integer.parseInt(count.getText())
         );
@@ -186,8 +191,8 @@ public final class ShlMain {
     public void defaults(SelectionEvent e) {
         department.setText("");
         count.setText("");
-        month.select(Calendar.getInstance().get(Calendar.MONTH));
-        year.setText(String.format("%s", Calendar.getInstance().get(Calendar.YEAR)));
+        month.select(LocalDate.now().getMonth().ordinal());
+        year.setText(String.valueOf(LocalDate.now().getYear()));
         verifier.setText("");
         model.clear();
         status.setText(String.valueOf(model.count()));
@@ -241,7 +246,7 @@ public final class ShlMain {
     private final class TableItemListener implements ItemListener {
         @Override
         public void itemsChanged(ItemsEvent ev) {
-            genBtn.setEnabled(ev != null && ev.getTotal() > 0);
+            genBtn.setEnabled(ev != null && ev.total() > 0);
         }
     }
 }

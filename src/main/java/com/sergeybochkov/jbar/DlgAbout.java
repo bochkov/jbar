@@ -1,9 +1,5 @@
 package com.sergeybochkov.jbar;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-
 import com.sergeybochkov.jbar.widgets.SButton;
 import com.sergeybochkov.jbar.widgets.SLabel;
 import com.sergeybochkov.jbar.widgets.SLink;
@@ -19,6 +15,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 
 public final class DlgAbout extends Dialog {
 
@@ -78,7 +78,7 @@ public final class DlgAbout extends Dialog {
     }
 
     private String copyStr() {
-        int year = Calendar.getInstance().get(Calendar.YEAR);
+        int year = LocalDate.now().getYear();
         return year > START_YEAR ?
                 String.format("%s-%s", START_YEAR, year) :
                 String.format("%s", START_YEAR);

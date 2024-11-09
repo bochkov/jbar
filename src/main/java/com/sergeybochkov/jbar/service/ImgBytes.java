@@ -1,10 +1,10 @@
 package com.sergeybochkov.jbar.service;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import javax.imageio.ImageIO;
 
 public final class ImgBytes {
 

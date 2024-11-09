@@ -1,12 +1,12 @@
 package com.sergeybochkov.jbar.widgets;
 
-import java.util.Arrays;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+
+import java.util.Arrays;
 
 public final class STable implements SControl<Table, STable> {
 

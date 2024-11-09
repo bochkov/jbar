@@ -1,11 +1,11 @@
 package com.sergeybochkov.jbar.widgets;
 
-import java.util.Collection;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+
+import java.util.Collection;
 
 public final class SCombo implements SControl<Combo, SCombo> {
 
