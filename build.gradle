@@ -4,16 +4,19 @@ plugins {
     id 'java'
     id 'application'
     id 'idea'
-    id 'com.github.ben-manes.versions' version '0.50.0'
+    id 'com.github.ben-manes.versions' version '0.51.0'
 }
 
 ext {
-    if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows())
+    platformArgs = []
+    if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows()) {
         swtPlatform = 'win32.win32.x86_64'
-    else if (DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX())
+    } else if (DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX()) {
         swtPlatform = 'cocoa.macosx.x86_64'
-    else
+        platformArgs += ["-XstartOnFirstThread", "-Xdock:name=JBar"]
+    } else {
         swtPlatform = 'linux.linux.x86_64'
+    }
 }
 
 group = 'com.sergeybochkov'
@@ -29,19 +32,20 @@ repositories {
 }
 
 dependencies {
-    implementation("org.eclipse.platform:org.eclipse.swt.${swtPlatform}:3.124.200") {
+    implementation("org.eclipse.platform:org.eclipse.swt.${swtPlatform}:3.127.0") {
         transitive = false
     }
     implementation 'net.sourceforge.barbecue:barbecue:1.5-beta1'
-    implementation 'commons-io:commons-io:2.15.1'
-    implementation 'ch.qos.logback:logback-classic:1.4.14'
+    implementation 'commons-io:commons-io:2.17.0'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+    implementation 'ch.qos.logback:logback-classic:1.5.12'
 
-    compileOnly 'org.projectlombok:lombok:1.18.30'
-    annotationProcessor 'org.projectlombok:lombok:1.18.30'
-    testCompileOnly 'org.projectlombok:lombok:1.18.30'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.11.3'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
 test {
@@ -50,7 +54,7 @@ test {
 
 application {
     mainClass = 'com.sergeybochkov.jbar.Application'
-    applicationDefaultJvmArgs = ["-Xmx64m", "-Dfile.encoding=UTF-8", "-XstartOnFirstThread", "-Xdock:name=JBar"]
+    applicationDefaultJvmArgs = ["-Xmx64m", "-Dfile.encoding=UTF-8"] + platformArgs
 }
 
 tasks.register('macApp') {
