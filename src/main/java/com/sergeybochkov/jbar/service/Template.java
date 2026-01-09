@@ -79,6 +79,7 @@ public final class Template {
                 pasteImageById(element, "logo", shield.logo());
                 pasteStringByMark(element, "{{verifier}}", shield.verifier());
                 pasteStringByMark(element, "{{date}}", shield.longDate());
+                pasteStringByMark(element, "{{barcode_label}}", shield.barcodeLabel());
                 defs.appendChild(element);
             }
 

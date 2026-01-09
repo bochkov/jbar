@@ -41,11 +41,14 @@ public final class Shield implements ItemInTable {
                 department,
                 date.format(DateTimeFormatter.ofPattern("MMyyyy"))
         );
-        String label = String.format("%s  %s",
+        return new BarcodeGen(data).generate();
+    }
+
+    public String barcodeLabel() {
+        return String.format("%s %s",
                 department,
                 date.format(DateTimeFormatter.ofPattern("MM  yyyy"))
         );
-        return BarcodeGen.barcode(data, label);
     }
 
     @Override

@@ -1,42 +1,27 @@
 package com.sergeybochkov.jbar.service;
 
-import lombok.extern.slf4j.Slf4j;
-import net.sourceforge.barbecue.Barcode;
-import net.sourceforge.barbecue.BarcodeException;
-import net.sourceforge.barbecue.BarcodeFactory;
-import net.sourceforge.barbecue.output.OutputException;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
+import lombok.RequiredArgsConstructor;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Map;
 
-@Slf4j
+@RequiredArgsConstructor
 public final class BarcodeGen {
 
-    public static byte[] barcode(String data, String label) throws IOException {
-        try {
-            Barcode barcode = BarcodeFactory.createCode128(data);
-            barcode.setLabel(label);
-            barcode.setBarHeight(40);
-            barcode.setBarWidth(2);
-            barcode.setFont(new Font("Verdana", Font.BOLD, 13));
-            barcode.setDrawingQuietSection(false);
-            barcode.setDrawingText(true);
-            barcode.setDoubleBuffered(true);
+    private final String data;
 
-            BufferedImage img = new BufferedImage(
-                    barcode.getWidth() - 2,  // поправки на какие-то левые пиксели
-                    barcode.getHeight() - 2, // поправки на какие-то левые пиксели
-                    BufferedImage.TYPE_BYTE_BINARY
-            );
-            barcode.draw((Graphics2D) img.getGraphics(), 0, 0);
-            return ImgBytes.asBytes(img);
-        } catch (BarcodeException | OutputException ex) {
-            throw new IOException(ex);
-        }
-    }
-
-    private BarcodeGen() {
+    public byte[] generate() throws IOException {
+        Code128Writer writer = new Code128Writer();
+        Map<EncodeHintType, Object> hints = Map.of();
+        BitMatrix matrix = writer.encode(data, BarcodeFormat.CODE_128, 90, 40, hints);
+        return ImgBytes.asBytes(
+                MatrixToImageWriter.toBufferedImage(matrix)
+        );
     }
 
 }

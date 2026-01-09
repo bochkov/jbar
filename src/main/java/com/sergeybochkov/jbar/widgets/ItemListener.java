@@ -1,8 +1,6 @@
 package com.sergeybochkov.jbar.widgets;
 
-import org.eclipse.swt.internal.SWTEventListener;
-
-public interface ItemListener extends SWTEventListener {
+public interface ItemListener {
 
     record ItemsEvent(int total) {
     }

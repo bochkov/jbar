@@ -19,8 +19,8 @@ import org.eclipse.swt.widgets.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -49,7 +49,7 @@ public final class ShlMain {
         this.self.setImage(new Image(display, Application.class.getResourceAsStream("/images/barcode.png")));
         this.self.setLayout(new GridLayout(2, false));
 
-        /// MENU
+        // MENU
         Menu menu = new Menu(self, SWT.BAR);
         self.setMenuBar(menu);
 
@@ -72,7 +72,7 @@ public final class ShlMain {
         Menu helpMenu = new SMenu(menu, "Помощь").menu();
         new SMenuItem(helpMenu, "О программе", e -> new DlgAbout(self).open());
 
-        /// WIDGETS
+        // WIDGETS
         SourceValidation sourceValidation = new SourceValidation();
         Group group = new SGroup(self, new GridLayout(2, false), "Исходные данные")
                 .hFill().span(2).widget();
@@ -236,8 +236,8 @@ public final class ShlMain {
             boolean isInputValid = !department.getText().isEmpty() &&
                     !count.getText().isEmpty() && count.getText().matches("\\d+") &&
                     (verifier.getSelectionIndex() > 0 || !verifier.getText().isEmpty()) &&
-                    month.getSelectionIndex() > 0 &&
-                    (year.getSelectionIndex() > 0 || !year.getText().isEmpty()) && year.getText().matches("\\d{4}");
+                    month.getSelectionIndex() >= 0 &&
+                    (year.getSelectionIndex() >= 0 || !year.getText().isEmpty()) && year.getText().matches("\\d{4}");
             quickBtn.setEnabled(isInputValid);
             planBtn.setEnabled(isInputValid);
         }

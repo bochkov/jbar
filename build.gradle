@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'idea'
-    id 'com.github.ben-manes.versions' version '0.52.0'
+    id 'com.github.ben-manes.versions' version '0.53.0'
 }
 
 ext {
@@ -21,8 +21,8 @@ group = 'com.sergeybochkov'
 version = '2.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 repositories {
@@ -30,20 +30,21 @@ repositories {
 }
 
 dependencies {
-    implementation("org.eclipse.platform:org.eclipse.swt.${swtPlatform}:3.129.0") {
+    implementation("org.eclipse.platform:org.eclipse.swt.${swtPlatform}:3.132.0") {
         transitive = false
     }
-    implementation 'net.sourceforge.barbecue:barbecue:1.5-beta1'
-    implementation 'commons-io:commons-io:2.19.0'
+    implementation 'com.google.zxing:core:3.5.4'
+    implementation 'com.google.zxing:javase:3.5.4'
+    implementation 'commons-io:commons-io:2.21.0'
 
-    implementation 'ch.qos.logback:logback-classic:1.5.18'
+    implementation 'ch.qos.logback:logback-classic:1.5.24'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.12.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:6.0.2'
     implementation 'org.slf4j:slf4j-api:2.0.17'
-    compileOnly 'org.projectlombok:lombok:1.18.38'
-    annotationProcessor 'org.projectlombok:lombok:1.18.38'
-    testCompileOnly 'org.projectlombok:lombok:1.18.38'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+    testCompileOnly 'org.projectlombok:lombok:1.18.42'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.42'
 }
 
 test {
@@ -58,7 +59,7 @@ application {
 tasks.register('macApp') {
     dependsOn 'build'
     doLast {
-        def outDir = "$buildDir/macApp" as File
+        def outDir = "$layout.buildDirectory/macApp" as File
         def appDir = "$outDir/JBar.app" as File
         delete outDir
         project.file(appDir).mkdirs()
@@ -84,8 +85,8 @@ tasks.register('macApp') {
 
 tasks.named('dependencyUpdates').configure {
     rejectVersionIf {
-        return ['.*-rc\\d+', '.*-alpha\\d+', '.*-m\\d+'].any { m -> 
-            it.candidate.version.toLowerCase().matches(m) 
+        return ['.*-rc\\d+', '.*-alpha\\d+', '.*-m\\d+'].any { m ->
+            it.candidate.version.toLowerCase().matches(m)
         }
     }
 }

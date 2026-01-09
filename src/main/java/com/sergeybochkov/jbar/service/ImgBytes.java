@@ -1,11 +1,15 @@
 package com.sergeybochkov.jbar.service;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImgBytes {
 
     public static byte[] asBytes(File file) throws IOException {
@@ -21,6 +25,4 @@ public final class ImgBytes {
         }
     }
 
-    private ImgBytes() {
-    }
 }
